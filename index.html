@@ -1,361 +1,169 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SelektRunCode - Editor</title>
-
+  <meta charset="UTF-8" />
+  <title>Mapa con círculo y obstáculos</title>
   <style>
-    :root {
-      --bg: #0f1412;
-      --panel: #1a1f1d;
-      --panel-light: #222826;
-      --accent: #3ba37b;
-      --accent-light: #4fcf9c;
-      --text: #e8f1ec;
-      --text-dim: #9aa7a0;
-      --border: #2a2f2d;
-      --radius: 10px;
-      --error: #ff4d4d;
-    }
-
     body {
       margin: 0;
-      font-family: "Inter", system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #111;
       display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    header {
-      padding: 14px 20px;
-      background: var(--panel);
-      border-bottom: 1px solid var(--border);
-      font-size: 18px;
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .header-right {
-      display: flex;
-      gap: 14px;
-      font-size: 20px;
-      color: var(--accent-light);
-    }
-
-    .header-icon {
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .header-icon:hover {
-      color: var(--accent);
-      transform: scale(1.15);
-    }
-
-    main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr 260px;
-      gap: 14px;
-      padding: 14px;
-      box-sizing: border-box;
-    }
-
-    .editor-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: var(--panel);
-      padding: 14px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-    }
-
-    .editor-top {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    select {
-      background: var(--panel-light);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 8px;
-      border-radius: var(--radius);
-      font-size: 14px;
-      outline: none;
-    }
-
-    button {
-      background: var(--accent);
-      color: #0b0f0d;
-      border: none;
-      padding: 8px 14px;
-      border-radius: var(--radius);
-      font-size: 14px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      background: var(--accent-light);
-    }
-
-    .status-text {
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-
-    textarea {
-      flex: 1;
-      background: #0d1210;
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 10px;
-      border-radius: var(--radius);
-      font-family: monospace;
-      font-size: 13px;
-      resize: none;
-      outline: none;
-    }
-
-    .console-panel {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      background: var(--panel);
-      padding: 14px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      overflow: hidden;
-    }
-
-    .console-title {
-      font-size: 15px;
-      margin-bottom: 8px;
-      color: var(--accent-light);
-      font-weight: 600;
-    }
-
-    .console-output {
-      flex: 1;
-      background: #0d1210;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px;
-      font-family: monospace;
-      font-size: 13px;
-      white-space: pre-wrap;
-      overflow-y: auto;
-      color: var(--text-dim);
-    }
-
-    .error-text {
-      color: var(--error);
-      font-weight: bold;
-    }
-
-    .ads-panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      color: var(--text-dim);
-      font-size: 14px;
-    }
-
-    .ads-placeholder {
-      background: #0d1210;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      height: 250px;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      color: var(--accent-light);
-      font-size: 14px;
-      text-align: center;
-      padding: 10px;
+      align-items: center;
+      height: 100vh;
+      color: #eee;
+      font-family: Arial, sans-serif;
     }
 
-    /* IFRAME CON PERMISOS PARA EJECUTAR JS */
-    #html-preview {
-      display: none;
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: white;
+    #gameContainer {
+      position: relative;
+      border: 2px solid #444;
+      background: #222;
     }
 
-    /* LOADER */
-    .loader {
+    canvas {
+      display: block;
+      background: #1a1a1a;
+    }
+
+    #info {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 45px;
-      height: 45px;
-      margin: -22px;
-      border: 4px solid var(--accent-light);
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: none;
-      z-index: 10;
+      top: 5px;
+      left: 5px;
+      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.6);
+      font-size: 12px;
+      border-radius: 4px;
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
   </style>
 </head>
-
 <body>
-
-  <header>
-    <div class="header-left">
-      SelektRunCode — Editor Minimalista
-    </div>
-
-    <div class="header-right">
-      <span class="header-icon">⚙️</span>
-      <span class="header-icon">🧩</span>
-    </div>
-  </header>
-
-  <main>
-
-    <div class="editor-panel">
-      <div class="editor-top">
-        <label for="language">Lenguaje:</label>
-        <select id="language">
-          <option value="html">HTML</option>
-          <option value="javascript">JavaScript (Render)</option>
-          <option value="python">Python</option>
-          <option value="cpp">C++</option>
-          <option value="java">Java</option>
-          <option value="php">PHP</option>
-        </select>
-
-        <button id="run-btn">Ejecutar</button>
-        <button id="fullscreen-btn" style="display:none;">Pantalla Completa</button>
-      </div>
-
-      <div class="status-text" id="status-text">
-        HTML y JavaScript se renderizan dentro del visor.
-      </div>
-
-      <textarea id="editor" placeholder="Escribe tu código aquí..."></textarea>
-    </div>
-
-    <div class="console-panel">
-      <div class="loader" id="loader"></div>
-
-      <div class="console-title">Consola / Render</div>
-      <div id="console" class="console-output">Aquí aparecerá la salida...</div>
-
-      <!-- IFRAME CON PERMISOS PARA EJECUTAR JS -->
-      <iframe id="html-preview" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
-    </div>
-
-    <div class="ads-panel">
-      <strong>Publicidad</strong>
-      <div class="ads-placeholder">
-        Aquí irá tu bloque de Google Ads
-      </div>
-    </div>
-
-  </main>
+  <div id="gameContainer">
+    <div id="info">Mueve con W A S D</div>
+    <canvas id="game" width="800" height="500"></canvas>
+  </div>
 
   <script>
-    const languageSelect = document.getElementById('language');
-    const editor = document.getElementById('editor');
-    const consoleOutput = document.getElementById('console');
-    const runBtn = document.getElementById('run-btn');
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
-    const statusText = document.getElementById('status-text');
-    const htmlPreview = document.getElementById('html-preview');
-    const loader = document.getElementById('loader');
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
-    function setStatus(text) {
-      statusText.textContent = text;
-    }
+    // Círculo (jugador)
+    const player = {
+      x: 80,
+      y: 80,
+      radius: 15,
+      speed: 3,
+      color: "#4CAF50"
+    };
 
-    function setConsole(text, isError = false) {
-      if (isError) {
-        consoleOutput.innerHTML = `<span class="error-text">${text}</span>`;
-      } else {
-        consoleOutput.textContent = text;
-      }
-    }
+    // Obstáculos (rectángulos)
+    const obstacles = [
+      { x: 150, y: 50, width: 200, height: 40 },
+      { x: 450, y: 120, width: 40, height: 250 },
+      { x: 250, y: 300, width: 300, height: 40 },
+      { x: 80,  y: 200, width: 120, height: 40 }
+    ];
 
-    function showLoader() {
-      loader.style.display = "block";
-    }
+    // Teclas pulsadas
+    const keys = {
+      w: false,
+      a: false,
+      s: false,
+      d: false
+    };
 
-    function hideLoader() {
-      loader.style.display = "none";
-    }
-
-    runBtn.addEventListener('click', () => {
-      const lang = languageSelect.value;
-      const code = editor.value;
-
-      showLoader();
-      setConsole("Procesando...");
-
-      setTimeout(() => {
-        if (!code.trim()) {
-          hideLoader();
-          setConsole('No hay código para ejecutar.', true);
-          return;
-        }
-
-        if (lang === 'html' || lang === 'javascript') {
-          setStatus('Renderizando contenido...');
-          setConsole('Mostrando renderizado en el visor...');
-          htmlPreview.style.display = 'block';
-          fullscreenBtn.style.display = 'inline-block';
-
-          // USAMOS SRCDOC PARA EVITAR BLOQUEOS
-          htmlPreview.srcdoc = code;
-
-          hideLoader();
-        }
-
-        else {
-          setStatus('Este lenguaje aún no está implementado.');
-          setConsole('Error: este lenguaje todavía no está disponible.', true);
-          htmlPreview.style.display = 'none';
-          fullscreenBtn.style.display = 'none';
-          hideLoader();
-        }
-
-      }, 600);
-    });
-
-    fullscreenBtn.addEventListener('click', () => {
-      if (htmlPreview.requestFullscreen) {
-        htmlPreview.requestFullscreen();
-      } else if (htmlPreview.webkitRequestFullscreen) {
-        htmlPreview.webkitRequestFullscreen();
-      } else if (htmlPreview.msRequestFullscreen) {
-        htmlPreview.msRequestFullscreen();
+    document.addEventListener("keydown", (e) => {
+      const key = e.key.toLowerCase();
+      if (key === "w" || key === "a" || key === "s" || key === "d") {
+        keys[key] = true;
       }
     });
 
-    editor.value = "<h1 style='color:lime;'>Hola</h1>\n<script>\n  document.body.innerHTML += \"<p style='color:white;'>JS ejecutándose dentro del iframe</p>\";\n</script>";
+    document.addEventListener("keyup", (e) => {
+      const key = e.key.toLowerCase();
+      if (key === "w" || key === "a" || key === "s" || key === "d") {
+        keys[key] = false;
+      }
+    });
+
+    // Detección de colisión círculo-rectángulo
+    function circleRectCollision(circle, rect) {
+      // Punto más cercano del rectángulo al centro del círculo
+      const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width));
+      const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height));
+
+      const dx = circle.x - closestX;
+      const dy = circle.y - closestY;
+
+      return (dx * dx + dy * dy) < (circle.radius * circle.radius);
+    }
+
+    function canMoveTo(newX, newY) {
+      const tempCircle = {
+        x: newX,
+        y: newY,
+        radius: player.radius
+      };
+
+      // Limites del canvas
+      if (
+        newX - player.radius < 0 ||
+        newX + player.radius > canvas.width ||
+        newY - player.radius < 0 ||
+        newY + player.radius > canvas.height
+      ) {
+        return false;
+      }
+
+      // Comprobar colisión con cada obstáculo
+      for (const obs of obstacles) {
+        if (circleRectCollision(tempCircle, obs)) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    function update() {
+      let newX = player.x;
+      let newY = player.y;
+
+      if (keys.w) newY -= player.speed;
+      if (keys.s) newY += player.speed;
+      if (keys.a) newX -= player.speed;
+      if (keys.d) newX += player.speed;
+
+      if (canMoveTo(newX, newY)) {
+        player.x = newX;
+        player.y = newY;
+      }
+    }
+
+    function drawPlayer() {
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+      ctx.fillStyle = player.color;
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function drawObstacles() {
+      ctx.fillStyle = "#555";
+      for (const obs of obstacles) {
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+      }
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      update();
+      drawObstacles();
+      drawPlayer();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
   </script>
-
 </body>
 </html>
