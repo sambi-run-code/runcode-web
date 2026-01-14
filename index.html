@@ -157,7 +157,6 @@
       color: var(--text-dim);
     }
 
-    /* TEXTO DE ERROR */
     .error-text {
       color: var(--error);
       font-weight: bold;
@@ -251,7 +250,7 @@
       </div>
 
       <div class="status-text" id="status-text">
-        Selecciona un lenguaje y escribe tu código. De momento solo HTML se ejecuta de verdad.
+        Selecciona un lenguaje y escribe tu código.
       </div>
 
       <textarea id="editor" placeholder="Escribe tu código aquí..."></textarea>
@@ -305,6 +304,32 @@
       loader.style.display = "none";
     }
 
+    // SANDBOX JAVASCRIPT (Web Worker)
+    const jsWorkerCode = `
+      self.onmessage = function(e) {
+        const code = e.data;
+        try {
+          const fn = new Function(code);
+          const result = fn();
+          self.postMessage({ type: "result", result: String(result) });
+        } catch (err) {
+          self.postMessage({ type: "error", error: String(err) });
+        }
+      };
+    `;
+
+    const jsBlob = new Blob([jsWorkerCode], { type: "application/javascript" });
+    const jsWorker = new Worker(URL.createObjectURL(jsBlob));
+
+    jsWorker.onmessage = (e) => {
+      hideLoader();
+      if (e.data.type === "result") {
+        setConsole("Resultado JS:\n" + e.data.result);
+      } else {
+        setConsole("Error en JavaScript:\n" + e.data.error, true);
+      }
+    };
+
     runBtn.addEventListener('click', () => {
       const lang = languageSelect.value;
       const code = editor.value;
@@ -321,7 +346,7 @@
 
         if (lang === 'html') {
           setStatus('Ejecutando HTML...');
-          setConsole('Renderizando HTML en la vista integrada...');
+          setConsole('Renderizando HTML...');
           htmlPreview.style.display = 'block';
           fullscreenBtn.style.display = 'inline-block';
 
@@ -331,13 +356,24 @@
           doc.close();
 
           hideLoader();
-        } else {
+        }
+
+        else if (lang === 'javascript') {
+          setStatus('Ejecutando JavaScript en sandbox...');
+          htmlPreview.style.display = 'none';
+          fullscreenBtn.style.display = 'none';
+
+          jsWorker.postMessage(code);
+        }
+
+        else {
           setStatus('Este lenguaje aún no está implementado.');
           setConsole('Error: este lenguaje todavía no está disponible.', true);
           htmlPreview.style.display = 'none';
           fullscreenBtn.style.display = 'none';
           hideLoader();
         }
+
       }, 600);
     });
 
@@ -351,7 +387,7 @@
       }
     });
 
-    editor.value = "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <title>Prueba HTML</title>\n</head>\n<body>\n  <h1 style=\"color: seagreen;\">Hola desde SelektRunCode</h1>\n  <p>Este HTML se está renderizando dentro de la consola.</p>\n</body>\n</html>";
+    editor.value = "console.log('Hola desde JavaScript sandbox');\n\n// Puedes devolver valores:\nreturn 5 + 7;";
   </script>
 
 </body>
