@@ -1,11 +1,177 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <title>Mi primera página en GitHub Pages</title>
-  </head>
-  <body>
-    <h1>Hola, mundo</h1>
-    <p>Esta página está alojada en GitHub Pages.</p>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RunCode - Editor</title>
+
+  <style>
+    /* ------------------------------
+       PALETA DE COLORES
+       ------------------------------ */
+    :root {
+      --bg: #0f1412;            /* Fondo general: gris verdoso muy oscuro */
+      --panel: #1a1f1d;         /* Paneles: gris oscuro suave */
+      --panel-light: #222826;   /* Variación para contraste */
+      --accent: #3ba37b;        /* Verde suave moderno */
+      --accent-light: #4fcf9c;  /* Verde más claro para hover */
+      --text: #e8f1ec;          /* Texto principal */
+      --text-dim: #9aa7a0;      /* Texto secundario */
+      --border: #2a2f2d;        /* Bordes sutiles */
+      --radius: 10px;
+    }
+
+    /* ------------------------------
+       ESTILO GLOBAL
+       ------------------------------ */
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 16px 22px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    /* ------------------------------
+       PANEL IZQUIERDO (Selector + Editor)
+       ------------------------------ */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--panel);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .selector {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    select {
+      background: var(--panel-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: var(--radius);
+      font-size: 15px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    select:hover {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      flex: 1;
+      background: #0d1210;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: var(--radius);
+      font-family: monospace;
+      font-size: 14px;
+      resize: none;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+    }
+
+    /* ------------------------------
+       PANEL DERECHO (Consola)
+       ------------------------------ */
+    .console-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .console-title {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: var(--accent-light);
+      font-weight: 600;
+    }
+
+    .console-output {
+      flex: 1;
+      background: #0d1210;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-family: monospace;
+      font-size: 14px;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      color: var(--text-dim);
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <header>
+    RunCode — Editor Minimalista
+  </header>
+
+  <main>
+
+    <!-- PANEL IZQUIERDO -->
+    <div class="left-panel">
+
+      <div class="selector">
+        <label for="language">Lenguaje:</label>
+        <select id="language">
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="cpp">C++</option>
+          <option value="java">Java</option>
+          <option value="php">PHP</option>
+        </select>
+      </div>
+
+      <textarea id="editor" placeholder="Escribe tu código aquí..."></textarea>
+
+    </div>
+
+    <!-- PANEL DERECHO -->
+    <div class="console-panel">
+      <div class="console-title">Consola</div>
+      <div id="console" class="console-output">Aquí aparecerá la salida...</div>
+    </div>
+
+  </main>
+
+</body>
 </html>
