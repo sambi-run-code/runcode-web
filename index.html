@@ -188,7 +188,7 @@
       padding: 10px;
     }
 
-    /* IFRAME CON PERMISOS PARA EJECUTAR JS */
+    /* IFRAME CON PERMISOS COMPLETOS PARA RENDERIZAR JS */
     #html-preview {
       display: none;
       width: 100%;
@@ -264,8 +264,11 @@
       <div class="console-title">Consola / Render</div>
       <div id="console" class="console-output">Aquí aparecerá la salida...</div>
 
-      <!-- IFRAME CON PERMISOS PARA EJECUTAR JS -->
-      <iframe id="html-preview" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
+      <!-- IFRAME CON PERMISOS COMPLETOS -->
+      <iframe id="html-preview"
+        src="about:blank"
+        sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups allow-top-navigation-by-user-activation">
+      </iframe>
     </div>
 
     <div class="ads-panel">
@@ -327,7 +330,7 @@
           htmlPreview.style.display = 'block';
           fullscreenBtn.style.display = 'inline-block';
 
-          // USAMOS SRCDOC PARA EVITAR BLOQUEOS
+          // USAMOS SRCDOC (FUNCIONA EN TODOS LOS NAVEGADORES)
           htmlPreview.srcdoc = code;
 
           hideLoader();
