@@ -16,6 +16,7 @@
       --text-dim: #9aa7a0;
       --border: #2a2f2d;
       --radius: 10px;
+      --error: #ff4d4d;
     }
 
     body {
@@ -156,6 +157,12 @@
       color: var(--text-dim);
     }
 
+    /* TEXTO DE ERROR */
+    .error-text {
+      color: var(--error);
+      font-weight: bold;
+    }
+
     .ads-panel {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -190,7 +197,6 @@
       background: white;
     }
 
-    /* LOADER */
     .loader {
       position: absolute;
       top: 50%;
@@ -283,8 +289,12 @@
       statusText.textContent = text;
     }
 
-    function setConsole(text) {
-      consoleOutput.textContent = text;
+    function setConsole(text, isError = false) {
+      if (isError) {
+        consoleOutput.innerHTML = `<span class="error-text">${text}</span>`;
+      } else {
+        consoleOutput.textContent = text;
+      }
     }
 
     function showLoader() {
@@ -305,7 +315,7 @@
       setTimeout(() => {
         if (!code.trim()) {
           hideLoader();
-          setConsole('No hay código para ejecutar.');
+          setConsole('No hay código para ejecutar.', true);
           return;
         }
 
@@ -323,7 +333,7 @@
           hideLoader();
         } else {
           setStatus('Este lenguaje aún no está implementado.');
-          setConsole('De momento solo HTML se ejecuta de verdad.');
+          setConsole('Error: este lenguaje todavía no está disponible.', true);
           htmlPreview.style.display = 'none';
           fullscreenBtn.style.display = 'none';
           hideLoader();
