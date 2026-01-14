@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RunCode - Editor</title>
+  <title>SelektRunCode - Editor</title>
 
   <style>
     :root {
@@ -34,19 +34,37 @@
       border-bottom: 1px solid var(--border);
       font-size: 18px;
       font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    /* LAYOUT PRINCIPAL */
+    .header-right {
+      display: flex;
+      gap: 14px;
+      font-size: 20px;
+      color: var(--accent-light);
+    }
+
+    .header-icon {
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .header-icon:hover {
+      color: var(--accent);
+      transform: scale(1.15);
+    }
+
     main {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr 260px; /* Editor | Consola | Ads */
+      grid-template-columns: 1fr 1fr 260px;
       gap: 14px;
       padding: 14px;
       box-sizing: border-box;
     }
 
-    /* PANEL EDITOR */
     .editor-panel {
       display: flex;
       flex-direction: column;
@@ -80,7 +98,6 @@
       outline: none;
     }
 
-    /* PANEL CONSOLA */
     .console-panel {
       display: flex;
       flex-direction: column;
@@ -110,7 +127,6 @@
       color: var(--text-dim);
     }
 
-    /* PANEL DE ADS */
     .ads-panel {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -143,12 +159,18 @@
 <body>
 
   <header>
-    RunCode — Editor Minimalista
+    <div class="header-left">
+      SelektRunCode — Editor Minimalista
+    </div>
+
+    <div class="header-right">
+      <span class="header-icon">⚙️</span>
+      <span class="header-icon">🧩</span>
+    </div>
   </header>
 
   <main>
 
-    <!-- PANEL EDITOR -->
     <div class="editor-panel">
       <label for="language">Lenguaje:</label>
       <select id="language">
@@ -163,13 +185,11 @@
       <textarea id="editor" placeholder="Escribe tu código aquí..."></textarea>
     </div>
 
-    <!-- PANEL CONSOLA -->
     <div class="console-panel">
       <div class="console-title">Consola</div>
       <div id="console" class="console-output">Aquí aparecerá la salida...</div>
     </div>
 
-    <!-- PANEL DE ADS -->
     <div class="ads-panel">
       <strong>Publicidad</strong>
       <div class="ads-placeholder">
