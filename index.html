@@ -353,8 +353,10 @@
       }
     });
 
-    editor.value = "<h1 style='color:lime;'>Hola</h1>\n<script>\n  document.body.innerHTML += \"<p style='color:white;'>JS ejecutándose dentro del iframe</p>\";\n</script>";
-  </script>
+editor.value = `<h1 style='color:lime;'>Hola</h1>
+<script>
+  document.body.innerHTML += '<p style="color:white;">JS ejecutándose dentro del iframe</p>';
+</script>`;
 
 </body>
 </html>
