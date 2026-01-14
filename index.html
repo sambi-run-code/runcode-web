@@ -265,7 +265,7 @@
       <div id="console" class="console-output">Aquí aparecerá la salida...</div>
 
       <!-- IFRAME CON PERMISOS PARA EJECUTAR JS -->
-      <iframe id="html-preview" sandbox="allow-scripts allow-same-origin"></iframe>
+      <iframe id="html-preview" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
     </div>
 
     <div class="ads-panel">
@@ -327,10 +327,8 @@
           htmlPreview.style.display = 'block';
           fullscreenBtn.style.display = 'inline-block';
 
-          const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
-          doc.open();
-          doc.write(code);
-          doc.close();
+          // USAMOS SRCDOC PARA EVITAR BLOQUEOS
+          htmlPreview.srcdoc = code;
 
           hideLoader();
         }
