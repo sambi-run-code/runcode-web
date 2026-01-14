@@ -188,6 +188,7 @@
       padding: 10px;
     }
 
+    /* IFRAME CON PERMISOS PARA EJECUTAR JS */
     #html-preview {
       display: none;
       width: 100%;
@@ -196,6 +197,7 @@
       background: white;
     }
 
+    /* LOADER */
     .loader {
       position: absolute;
       top: 50%;
@@ -262,7 +264,8 @@
       <div class="console-title">Consola / Render</div>
       <div id="console" class="console-output">Aquí aparecerá la salida...</div>
 
-      <iframe id="html-preview"></iframe>
+      <!-- IFRAME CON PERMISOS PARA EJECUTAR JS -->
+      <iframe id="html-preview" sandbox="allow-scripts allow-same-origin"></iframe>
     </div>
 
     <div class="ads-panel">
@@ -353,7 +356,7 @@
       }
     });
 
-    editor.value = "<h1 style='color: seagreen;'>Hola desde JavaScript Render</h1>\n<script>\n  document.body.style.background = '#111';\n  document.body.innerHTML += '<p style=\"color:white;\">JS ejecutado dentro del iframe</p>';\n</script>";
+    editor.value = "<h1 style='color:lime;'>Hola</h1>\n<script>\n  document.body.innerHTML += \"<p style='color:white;'>JS ejecutándose dentro del iframe</p>\";\n</script>";
   </script>
 
 </body>
