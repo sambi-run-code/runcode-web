@@ -237,9 +237,9 @@
       <div class="editor-top">
         <label for="language">Lenguaje:</label>
         <select id="language">
-          <option value="html">HTML</option>
-          <option value="javascript">JavaScript (Render)</option>
           <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="html">HTML</option>
           <option value="cpp">C++</option>
           <option value="java">Java</option>
           <option value="php">PHP</option>
@@ -250,7 +250,7 @@
       </div>
 
       <div class="status-text" id="status-text">
-        HTML y JavaScript se renderizan dentro del visor.
+        Selecciona un lenguaje y escribe tu código.
       </div>
 
       <textarea id="editor" placeholder="Escribe tu código aquí..."></textarea>
@@ -259,7 +259,7 @@
     <div class="console-panel">
       <div class="loader" id="loader"></div>
 
-      <div class="console-title">Consola / Render</div>
+      <div class="console-title">Consola</div>
       <div id="console" class="console-output">Aquí aparecerá la salida...</div>
 
       <iframe id="html-preview"></iframe>
@@ -304,6 +304,32 @@
       loader.style.display = "none";
     }
 
+    // SANDBOX JAVASCRIPT (Web Worker)
+    const jsWorkerCode = `
+      self.onmessage = function(e) {
+        const code = e.data;
+        try {
+          const fn = new Function(code);
+          const result = fn();
+          self.postMessage({ type: "result", result: String(result) });
+        } catch (err) {
+          self.postMessage({ type: "error", error: String(err) });
+        }
+      };
+    `;
+
+    const jsBlob = new Blob([jsWorkerCode], { type: "application/javascript" });
+    const jsWorker = new Worker(URL.createObjectURL(jsBlob));
+
+    jsWorker.onmessage = (e) => {
+      hideLoader();
+      if (e.data.type === "result") {
+        setConsole("Resultado JS:\n" + e.data.result);
+      } else {
+        setConsole("Error en JavaScript:\n" + e.data.error, true);
+      }
+    };
+
     runBtn.addEventListener('click', () => {
       const lang = languageSelect.value;
       const code = editor.value;
@@ -318,18 +344,26 @@
           return;
         }
 
-        if (lang === 'html' || lang === 'javascript') {
-          setStatus('Renderizando contenido...');
-          setConsole('Mostrando renderizado en el visor...');
+        if (lang === 'html') {
+          setStatus('Ejecutando HTML...');
+          setConsole('Renderizando HTML...');
           htmlPreview.style.display = 'block';
           fullscreenBtn.style.display = 'inline-block';
 
-          const doc = htmlPreview.contentDocument;
+          const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
           doc.open();
           doc.write(code);
           doc.close();
 
           hideLoader();
+        }
+
+        else if (lang === 'javascript') {
+          setStatus('Ejecutando JavaScript en sandbox...');
+          htmlPreview.style.display = 'none';
+          fullscreenBtn.style.display = 'none';
+
+          jsWorker.postMessage(code);
         }
 
         else {
@@ -353,10 +387,8 @@
       }
     });
 
-editor.value = `<h1 style='color:lime;'>Hola</h1>
-<script>
-  document.body.innerHTML += '<p style="color:white;">JS ejecutándose dentro del iframe</p>';
-</script>`;
+    editor.value = "console.log('Hola desde JavaScript sandbox');\n\n// Puedes devolver valores:\nreturn 5 + 7;";
+  </script>
 
 </body>
 </html>
