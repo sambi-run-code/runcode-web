@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SelektRunCode — v0.4</title>
+  <title>SelektRunCode — v0.5</title>
 
   <!-- Pyodide -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 
-  <!-- Tipografía profesional -->
+  <!-- Tipografía -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
@@ -27,7 +27,6 @@
       --glass-border: rgba(255,255,255,0.04);
     }
 
-    /* Light theme variables (applied via .light on body) */
     body.light {
       --bg:#f6f7f9;
       --surface:#ffffff;
@@ -42,19 +41,16 @@
       --glass-border: rgba(11,18,32,0.06);
     }
 
-    /* Base */
     html,body{height:100%;margin:0;font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
     body{
       background: linear-gradient(180deg,var(--bg), #07100f 120%);
       color:var(--text);
       -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
       display:flex;
       flex-direction:column;
       min-height:100vh;
     }
 
-    /* Header */
     header.app-header{
       display:flex;
       align-items:center;
@@ -63,51 +59,22 @@
       background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
       border-bottom:1px solid var(--glass-border);
       box-shadow:var(--shadow);
-      position:relative;
-      z-index:10;
+      z-index:20;
     }
 
-    .brand {
-      display:flex;
-      gap:14px;
-      align-items:center;
-    }
-
-    .logo {
-      width:44px;height:44px;border-radius:10px;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      display:flex;align-items:center;justify-content:center;
-      box-shadow: 0 6px 18px rgba(47,192,122,0.14), inset 0 -6px 18px rgba(255,255,255,0.03);
-      font-weight:800;color:#04210f;font-size:18px;
-    }
-
-    .brand h1{margin:0;font-size:16px;font-weight:700;letter-spacing:0.2px;}
+    .brand{display:flex;gap:14px;align-items:center;}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#04210f;font-size:18px;}
+    .brand h1{margin:0;font-size:16px;font-weight:700;}
     .brand p{margin:0;font-size:12px;color:var(--muted);}
 
-    .header-actions{
-      display:flex;gap:12px;align-items:center;
-    }
-
-    .version-badge{
-      font-weight:700;
-      background:transparent;
-      color:var(--muted);
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--glass-border);
-      font-size:13px;
-    }
-
-    .icon-btn{
-      width:44px;height:44px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;
-      background:var(--glass);border:1px solid var(--glass-border);cursor:pointer;color:var(--text);
-      transition:transform .14s ease, background .14s ease, box-shadow .14s ease;
-    }
+    .header-actions{display:flex;gap:12px;align-items:center;}
+    .version-badge{font-weight:700;background:transparent;color:var(--muted);padding:6px 10px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;}
+    .icon-btn{width:44px;height:44px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--glass);border:1px solid var(--glass-border);cursor:pointer;color:var(--text);transition:transform .14s ease, background .14s ease;}
     .icon-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(2,6,6,0.25);}
 
-    /* Layout */
     main.app-main{
       display:grid;
-      grid-template-columns: 1fr 520px 300px;
+      grid-template-columns: 1fr 520px 320px;
       gap:20px;
       padding:22px;
       width:100%;
@@ -116,7 +83,6 @@
       flex:1;
     }
 
-    /* Editor column */
     .panel{
       background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
       border-radius:var(--radius);
@@ -124,85 +90,67 @@
       padding:16px;
       box-shadow:var(--shadow);
       display:flex;flex-direction:column;gap:12px;
+      box-sizing:border-box;
+      position:relative;
+      z-index:0;
+      overflow:hidden;
     }
 
-    .editor-top{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-    }
-
+    .editor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;}
     .controls-left{display:flex;gap:10px;align-items:center;}
     .controls-right{display:flex;gap:10px;align-items:center;}
+    select.lang-select{background:transparent;border:1px solid var(--glass-border);color:var(--text);padding:8px 12px;border-radius:10px;font-weight:600;}
 
-    select.lang-select{
-      background:transparent;border:1px solid var(--glass-border);color:var(--text);padding:8px 12px;border-radius:10px;font-weight:600;
-    }
-
-    /* Buttons (primary / secondary) */
-    .btn-primary{
-      display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;
-      background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;font-weight:700;cursor:pointer;
-      box-shadow: 0 8px 20px rgba(47,192,122,0.12);
-      transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
-    }
-    .btn-primary:active{transform:translateY(1px) scale(.998);}
-    .btn-ghost{
-      padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:var(--text);cursor:pointer;font-weight:600;
-      transition:transform .12s ease, background .12s ease;
-    }
+    .btn-primary{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;font-weight:700;cursor:pointer;box-shadow: 0 8px 20px rgba(47,192,122,0.12);transition: transform .12s ease;}
+    .btn-ghost{padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:var(--text);cursor:pointer;font-weight:600;transition:transform .12s ease;}
     .btn-ghost:hover{background:rgba(255,255,255,0.02);transform:translateY(-2px);}
 
-    /* Editor area */
-    .editor-area{
-      display:flex;flex-direction:column;gap:10px;height:calc(100% - 120px);
+    .btn-icon{
+      width:44px;height:44px;border-radius:10px;border:none;background:var(--glass);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);
+      transition:transform .12s ease, background .12s ease;
     }
+    .btn-icon:hover{transform:translateY(-3px);background:rgba(255,255,255,0.02);}
 
-    textarea#editor{
-      width:100%;height:100%;min-height:360px;resize:none;padding:16px;border-radius:10px;border:1px solid var(--glass-border);
-      background:linear-gradient(180deg, rgba(0,0,0,0.06), transparent);
-      color:var(--text);font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.5;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-    }
+    .editor-area{display:flex;flex-direction:column;gap:10px;height:calc(100% - 120px);}
+    textarea#editor{width:100%;height:100%;min-height:360px;resize:none;padding:16px;border-radius:10px;border:1px solid var(--glass-border);background:linear-gradient(180deg, rgba(0,0,0,0.06), transparent);color:var(--text);font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.5;box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);}
 
-    /* Right column: preview + console */
     .preview-panel{display:flex;flex-direction:column;gap:12px;height:100%;}
-    .preview-frame{
-      flex:1;border-radius:10px;border:1px solid var(--glass-border);overflow:hidden;background:#fff;display:none;
-    }
+    .preview-frame{flex:1;border-radius:10px;border:1px solid var(--glass-border);overflow:hidden;background:#fff;display:none;position:relative;z-index:1;}
     iframe#html-preview{width:100%;height:100%;border:0;display:block;}
 
-    .console{
-      height:260px;border-radius:10px;border:1px solid var(--glass-border);overflow:auto;background:linear-gradient(180deg, rgba(0,0,0,0.03), transparent);
-      padding:12px;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);
-    }
-
-    .console .entry{
-      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
-      border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.02);
-      display:flex;flex-direction:column;gap:6px;
-    }
+    .console{height:260px;border-radius:10px;border:1px solid var(--glass-border);overflow:auto;background:linear-gradient(180deg, rgba(0,0,0,0.03), transparent);padding:12px;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);}
+    .console .entry{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:6px;}
     .console .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;}
     .console .text{white-space:pre-wrap;color:var(--text);}
 
-    /* Rightmost ads / info */
     .side-info{display:flex;flex-direction:column;gap:12px;height:100%;}
     .card{padding:12px;border-radius:10px;border:1px solid var(--glass-border);background:var(--card);color:var(--muted);}
 
-    /* Footer / status bar */
-    footer.statusbar{
-      display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-top:1px solid var(--glass-border);
-      background:linear-gradient(180deg, transparent, rgba(255,255,255,0.01));
-      font-size:13px;color:var(--muted);
+    footer.statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-top:1px solid var(--glass-border);background:linear-gradient(180deg, transparent, rgba(255,255,255,0.01));font-size:13px;color:var(--muted);}
+
+    /* Ad slot */
+    .ad-slot{
+      width:100%;
+      height:250px;
+      border-radius:10px;
+      border:1px dashed var(--glass-border);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      color:var(--muted);
+      box-sizing:border-box;
     }
 
-    /* Responsive */
-    @media (max-width:1200px){
-      main.app-main{grid-template-columns:1fr 420px 260px;}
-    }
-    @media (max-width:980px){
-      main.app-main{grid-template-columns:1fr; padding:16px;}
-      .preview-panel{order:2}
-      .side-info{order:3}
-    }
+    /* Fix overlapping issues: ensure panels stack cleanly */
+    main.app-main > * { min-height: 220px; box-sizing: border-box; }
+    .panel, .preview-panel, .side-info { z-index: 0; }
+    .preview-frame { z-index: 1; }
+    header.app-header { z-index: 30; }
+    footer.statusbar { z-index: 20; }
+
+    @media (max-width:1200px){ main.app-main{grid-template-columns:1fr 420px 300px;} }
+    @media (max-width:980px){ main.app-main{grid-template-columns:1fr; padding:16px;} .preview-panel{order:2} .side-info{order:3} }
   </style>
 </head>
 <body>
@@ -217,7 +165,7 @@
     </div>
 
     <div class="header-actions">
-      <div class="version-badge">v0.4</div>
+      <div class="version-badge">v0.5</div>
       <button id="theme-toggle" class="icon-btn" title="Cambiar tema">🌙</button>
       <button class="icon-btn" title="Configuración">⚙️</button>
       <button class="icon-btn" title="Extensiones">🧩</button>
@@ -228,7 +176,6 @@
 
   <main class="app-main">
 
-    <!-- Editor column -->
     <section class="panel" style="min-height:520px;">
       <div class="editor-top">
         <div class="controls-left">
@@ -243,7 +190,8 @@
         <div class="controls-right">
           <button id="run-btn" class="btn-primary" title="Ejecutar (Ctrl+Enter)">▶ Ejecutar</button>
           <button id="clear-console-btn" class="btn-ghost" title="Limpiar consola">🧹 Limpiar</button>
-          <button id="fullscreen-btn" class="btn-ghost" title="Pantalla completa" style="display:none;">🖥 Pantalla</button>
+          <!-- Icon-only fullscreen button -->
+          <button id="fullscreen-btn" class="btn-icon" title="Pantalla completa" aria-label="Pantalla completa" style="display:none;">⤢</button>
         </div>
       </div>
 
@@ -252,7 +200,6 @@
       </div>
     </section>
 
-    <!-- Preview + Console -->
     <aside class="panel preview-panel">
       <div style="display:flex;gap:12px;align-items:center;">
         <div style="font-weight:700;">Vista previa</div>
@@ -265,11 +212,9 @@
 
       <div class="console" id="console">
         <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Consola de salida</div>
-        <!-- entries appended here -->
       </div>
     </aside>
 
-    <!-- Right side: info / ads -->
     <aside class="panel side-info">
       <div class="card">
         <strong>Atajos</strong>
@@ -280,12 +225,17 @@
         </ul>
       </div>
 
-      <div class="card" style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;">
-        <div style="color:var(--muted);text-align:center;">
-          <div style="font-weight:700;margin-bottom:8px;color:var(--text);">Plantillas rápidas</div>
-          <button id="tpl-html" class="btn-ghost" style="width:100%;margin-bottom:8px;">Insertar HTML</button>
-          <button id="tpl-js" class="btn-ghost" style="width:100%;margin-bottom:8px;">Insertar JavaScript</button>
-          <button id="tpl-py" class="btn-ghost" style="width:100%;">Insertar Python</button>
+      <div class="card" style="display:flex;flex-direction:column;gap:12px;align-items:stretch;">
+        <strong>Plantillas rápidas</strong>
+        <button id="tpl-html" class="btn-ghost" style="width:100%;">Insertar HTML</button>
+        <button id="tpl-js" class="btn-ghost" style="width:100%;">Insertar JavaScript</button>
+        <button id="tpl-py" class="btn-ghost" style="width:100%;">Insertar Python</button>
+      </div>
+
+      <div class="card">
+        <strong>Publicidad</strong>
+        <div class="ad-slot" id="ad-slot">
+          Bloque de anuncios (aquí inserta tu script de AdSense o tag)
         </div>
       </div>
 
@@ -306,7 +256,6 @@
   </footer>
 
   <script>
-    // Elements
     const languageSelect = document.getElementById('language');
     const editor = document.getElementById('editor');
     const runBtn = document.getElementById('run-btn');
@@ -322,7 +271,6 @@
     const themeToggle = document.getElementById('theme-toggle');
     const themeLabel = document.getElementById('theme-label');
 
-    // Pyodide
     let pyodide = null;
     (async function loadPy(){
       try{
@@ -335,11 +283,8 @@
       }
     })();
 
-    // Local storage: load / save
-    const STORAGE_KEY = 'selektruncode_v0.4_code';
-    editor.value = localStorage.getItem(STORAGE_KEY) || `<!-- HTML de ejemplo -->
-<h1 style="color:#2fc07a">Hola desde SelektRunCode v0.4</h1>
-<p>Selecciona JavaScript o Python para probar otros modos.</p>`;
+    const STORAGE_KEY = 'selektruncode_v0.5_code';
+    editor.value = localStorage.getItem(STORAGE_KEY) || `<!-- HTML de ejemplo -->\n<h1 style="color:#2fc07a">Hola desde SelektRunCode v0.5</h1>\n<p>Selecciona JavaScript o Python para probar otros modos.</p>`;
 
     function saveLocal(){
       localStorage.setItem(STORAGE_KEY, editor.value);
@@ -350,12 +295,10 @@
 
     editor.addEventListener('input', () => {
       savedIndicator.textContent = 'No';
-      // debounce save
       if (window._saveTimeout) clearTimeout(window._saveTimeout);
       window._saveTimeout = setTimeout(saveLocal, 700);
     });
 
-    // Theme toggle
     if (localStorage.getItem('sr_theme') === 'light'){
       document.body.classList.add('light');
       themeToggle.textContent = '🌞';
@@ -372,7 +315,6 @@
       localStorage.setItem('sr_theme', isLight ? 'light' : 'dark');
     });
 
-    // Console helpers
     function appendConsole(text, isError=false){
       const entry = document.createElement('div');
       entry.className = 'entry';
@@ -390,13 +332,11 @@
       consoleEl.scrollTop = consoleEl.scrollHeight;
     }
 
-    // Clear console
     clearBtn.addEventListener('click', () => {
       consoleEl.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Consola de salida</div>';
       appendConsole('Consola limpiada.');
     });
 
-    // Templates
     document.getElementById('tpl-html').addEventListener('click', () => {
       editor.value = `<!doctype html>\n<html>\n  <head>\n    <meta charset="utf-8">\n    <title>Demo</title>\n  </head>\n  <body>\n    <h1 style="color: #2fc07a">Hola HTML</h1>\n  </body>\n</html>`;
     });
@@ -407,18 +347,14 @@
       editor.value = `print("Hola desde Python")\nfor i in range(3):\n    print("línea", i)`;
     });
 
-    // Keyboard shortcuts
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveLocal(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); clearBtn.click(); }
     });
 
-    // Run code
     runBtn.addEventListener('click', runCode);
-    languageSelect.addEventListener('change', () => {
-      statusLang.textContent = languageSelect.value.toUpperCase();
-    });
+    languageSelect.addEventListener('change', () => { statusLang.textContent = languageSelect.value.toUpperCase(); });
 
     async function runCode(){
       const lang = languageSelect.value;
@@ -426,7 +362,6 @@
       statusMsg.textContent = 'Ejecutando...';
       appendConsole('Procesando código (' + lang + ')');
 
-      // show/hide preview
       if (lang === 'html'){
         previewFrame.style.display = 'block';
         fullscreenBtn.style.display = 'inline-block';
@@ -434,10 +369,11 @@
           const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
           doc.open(); doc.write(code); doc.close();
           appendConsole('Renderizado HTML correctamente.');
+          statusMsg.textContent = 'Renderizado HTML';
         }catch(e){
           appendConsole('Error renderizando HTML: ' + e, true);
+          statusMsg.textContent = 'Error HTML';
         }
-        statusMsg.textContent = 'Renderizado HTML';
         return;
       } else {
         previewFrame.style.display = 'none';
@@ -446,7 +382,6 @@
 
       if (lang === 'javascript'){
         try{
-          // sandbox via Function (kept simple for now)
           const result = new Function(code)();
           appendConsole('Resultado JS: ' + String(result));
           statusMsg.textContent = 'JS ejecutado';
@@ -464,7 +399,6 @@
           return;
         }
         try{
-          // capture stdout by wrapping
           const wrapped = `
 import sys, io
 _old = sys.stdout
@@ -487,15 +421,16 @@ output
       }
     }
 
-    // Fullscreen preview
     fullscreenBtn.addEventListener('click', () => {
       if (htmlPreview.requestFullscreen) htmlPreview.requestFullscreen();
       else if (htmlPreview.webkitRequestFullscreen) htmlPreview.webkitRequestFullscreen();
     });
 
-    // Initial status
     statusLang.textContent = languageSelect.value.toUpperCase();
-    appendConsole('Bienvenido a SelektRunCode v0.4 — interfaz profesional cargada.');
+    appendConsole('Bienvenido a SelektRunCode v0.5 — interfaz profesional cargada.');
+
+    // AD SLOT note: insert your ad provider script into #ad-slot
+    // Example: for AdSense you would place the ad unit code inside the element with id="ad-slot"
   </script>
 </body>
 </html>
