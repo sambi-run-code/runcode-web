@@ -54,4 +54,218 @@
 
     .editor-panel, .console-panel, .ads-panel {
       background: var(--panel);
-     
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    textarea {
+      flex: 1;
+      background: #0d1210;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: var(--radius);
+      font-family: monospace;
+      font-size: 13px;
+      resize: none;
+      outline: none;
+    }
+
+    select, button {
+      background: var(--panel-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button {
+      background: var(--accent);
+      color: #0b0f0d;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background: var(--accent-light);
+    }
+
+    #console {
+      flex: 1;
+      background: #0d1210;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      color: var(--text-dim);
+    }
+
+    .error-text {
+      color: var(--error);
+      font-weight: bold;
+    }
+
+    #html-preview {
+      display: none;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 45px;
+      height: 45px;
+      margin: -22px;
+      border: 4px solid var(--accent-light);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+      z-index: 10;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  SelektRunCode — Editor Minimalista
+</header>
+
+<main>
+
+  <!-- PANEL EDITOR -->
+  <div class="editor-panel">
+    <label>Lenguaje:</label>
+    <select id="language">
+      <option value="html">HTML</option>
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+    </select>
+
+    <textarea id="editor"></textarea>
+
+    <button id="run-btn">Ejecutar</button>
+    <button id="fullscreen-btn" style="display:none;">Pantalla Completa</button>
+  </div>
+
+  <!-- PANEL CONSOLA -->
+  <div class="console-panel" style="position:relative;">
+    <div class="loader" id="loader"></div>
+    <div id="console">Aquí aparecerá la salida...</div>
+    <iframe id="html-preview" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+
+  <!-- PANEL PUBLICIDAD -->
+  <div class="ads-panel">
+    <strong>Publicidad</strong>
+    <div style="background:#0d1210; border:1px solid var(--border); border-radius:var(--radius); height:250px; display:flex; align-items:center; justify-content:center; color:var(--accent-light);">
+      Aquí irá tu bloque de Google Ads
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const languageSelect = document.getElementById('language');
+  const editor = document.getElementById('editor');
+  const consoleOutput = document.getElementById('console');
+  const runBtn = document.getElementById('run-btn');
+  const fullscreenBtn = document.getElementById('fullscreen-btn');
+  const htmlPreview = document.getElementById('html-preview');
+  const loader = document.getElementById('loader');
+
+  let pyodide = null;
+
+  loadPyodide().then(p => { pyodide = p; });
+
+  function showLoader() { loader.style.display = "block"; }
+  function hideLoader() { loader.style.display = "none"; }
+
+  function setConsole(text, isError = false) {
+    if (isError) {
+      consoleOutput.innerHTML = `<span class="error-text">${text}</span>`;
+    } else {
+      consoleOutput.textContent = text;
+    }
+  }
+
+  runBtn.addEventListener('click', async () => {
+    const lang = languageSelect.value;
+    const code = editor.value;
+
+    showLoader();
+    setConsole("Procesando...");
+
+    setTimeout(async () => {
+      try {
+        if (lang === "html") {
+          const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
+          doc.open(); doc.write(code); doc.close();
+          htmlPreview.style.display = "block";
+          fullscreenBtn.style.display = "inline-block";
+          setConsole("Renderizado HTML");
+        }
+
+        else if (lang === "javascript") {
+          htmlPreview.style.display = "none";
+          fullscreenBtn.style.display = "none";
+          try {
+            const result = new Function(code)();
+            setConsole("Resultado JS:\n" + result);
+          } catch (err) {
+            setConsole("Error JS:\n" + err, true);
+          }
+        }
+
+        else if (lang === "python") {
+          htmlPreview.style.display = "none";
+          fullscreenBtn.style.display = "none";
+
+          if (!pyodide) {
+            setConsole("Pyodide aún no cargado", true);
+            return;
+          }
+
+          try {
+            const result = await pyodide.runPythonAsync(code);
+            setConsole("Salida Python:\n" + result);
+          } catch (err) {
+            setConsole("Error Python:\n" + err, true);
+          }
+        }
+      } finally {
+        hideLoader();
+      }
+    }, 200);
+  });
+
+  fullscreenBtn.addEventListener('click', () => {
+    htmlPreview.requestFullscreen();
+  });
+
+  editor.value = "<h1>Hola mundo</h1>";
+</script>
+
+</body>
+</html>
