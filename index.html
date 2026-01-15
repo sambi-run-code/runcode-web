@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SelektRunCode — v0.6.1</title>
+  <title>SelektRunCode — v0.6.2</title>
 
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 
@@ -96,7 +96,54 @@
     .editor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;}
     .controls-left{display:flex;gap:10px;align-items:center;}
     .controls-right{display:flex;gap:10px;align-items:center;}
-    select.lang-select{background:transparent;border:1px solid var(--glass-border);color:var(--text);padding:8px 12px;border-radius:10px;font-weight:600;}
+
+    /* Custom select wrapper */
+    .select-wrap{
+      position:relative;
+      display:inline-block;
+      min-width:170px;
+      user-select:none;
+    }
+    .faux-select{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:10px;
+      background:transparent;
+      border:1px solid var(--glass-border);
+      color:var(--text);
+      cursor:pointer;
+      font-weight:600;
+      min-height:40px;
+      box-sizing:border-box;
+    }
+    .faux-select:focus{outline:none;box-shadow:0 6px 18px rgba(0,0,0,0.25);}
+    .faux-select .label{font-size:14px;}
+    .faux-select .arrow{font-size:14px;color:var(--muted);}
+
+    .options-list{
+      position:absolute;
+      top:calc(100% + 8px);
+      left:0;
+      right:0;
+      background:var(--panel);
+      border:1px solid var(--glass-border);
+      border-radius:10px;
+      box-shadow:var(--shadow);
+      z-index:60;
+      overflow:hidden;
+    }
+    .options-list .opt{
+      padding:10px 12px;
+      cursor:pointer;
+      color:var(--text);
+      font-weight:600;
+      background:transparent;
+    }
+    .options-list .opt:hover{background:rgba(255,255,255,0.02);color:var(--accent-2);}
+    .options-list .opt.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;}
 
     .btn-primary{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;font-weight:700;cursor:pointer;}
     .btn-ghost{padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:var(--text);cursor:pointer;font-weight:600;}
@@ -124,8 +171,20 @@
     }
 
     .preview-panel{display:flex;flex-direction:column;gap:12px;height:100%;}
-    .preview-frame{flex:1;border-radius:10px;border:1px solid var(--glass-border);overflow:hidden;background:#fff;display:none;}
-    iframe#html-preview{width:100%;height:100%;border:0;}
+    .preview-frame{flex:1;border-radius:10px;border:1px solid var(--glass-border);overflow:hidden;background:#fff;display:none;position:relative;}
+    iframe#html-preview{width:100%;height:100%;border:0;display:block;}
+
+    /* fullscreen button inside preview */
+    .preview-fullscreen-btn{
+      position:absolute;
+      top:12px;
+      right:12px;
+      z-index:40;
+      width:44px;height:44px;border-radius:10px;border:none;background:var(--glass);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);
+      transition:transform .12s ease, background .12s ease;
+      box-shadow: 0 8px 20px rgba(2,6,6,0.12);
+    }
+    .preview-fullscreen-btn:hover{transform:translateY(-3px);background:rgba(255,255,255,0.02);}
 
     .console{height:260px;border-radius:10px;border:1px solid var(--glass-border);overflow:auto;background:linear-gradient(180deg, rgba(0,0,0,0.03), transparent);padding:12px;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);}
     .console .entry{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:6px;}
@@ -166,7 +225,7 @@
     </div>
 
     <div class="header-actions">
-      <div class="version-badge">v0.6.1</div>
+      <div class="version-badge">v0.6.2</div>
       <button id="theme-toggle" class="icon-btn">🌙</button>
       <button class="icon-btn">⚙️</button>
       <button class="icon-btn">🧩</button>
@@ -180,11 +239,17 @@
     <section class="panel">
       <div class="editor-top">
         <div class="controls-left">
-          <select id="language" class="lang-select">
-            <option value="html">HTML</option>
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-          </select>
+          <div class="select-wrap" id="lang-select-wrap" aria-haspopup="listbox">
+            <div class="faux-select" id="faux-select" tabindex="0" role="button" aria-expanded="false" aria-label="Seleccionar lenguaje">
+              <span class="label" id="faux-label">HTML</span>
+              <span class="arrow">▾</span>
+            </div>
+            <div class="options-list" id="options-list" style="display:none;">
+              <div class="opt active" data-value="html">HTML</div>
+              <div class="opt" data-value="javascript">JavaScript</div>
+              <div class="opt" data-value="python">Python</div>
+            </div>
+          </div>
           <div style="font-size:13px;color:var(--muted);padding-left:6px;">Tema: <span id="theme-label">Oscuro</span></div>
         </div>
 
@@ -208,6 +273,7 @@
 
       <div class="preview-frame" id="preview-frame">
         <iframe id="html-preview" sandbox="allow-scripts allow-same-origin"></iframe>
+        <button id="preview-fullscreen" class="preview-fullscreen-btn" title="Pantalla completa vista previa" aria-label="Pantalla completa vista previa" style="display:none;">⤢</button>
       </div>
 
       <div class="console" id="console">
@@ -241,11 +307,16 @@
   </footer>
 
   <script>
-    const languageSelect = document.getElementById('language');
+    const fauxSelect = document.getElementById('faux-select');
+    const fauxLabel = document.getElementById('faux-label');
+    const optionsList = document.getElementById('options-list');
+    const opts = Array.from(optionsList.querySelectorAll('.opt'));
+    const languageSelect = { value: 'html' }; // internal value holder
     const editor = document.getElementById('editor');
     const runBtn = document.getElementById('run-btn');
     const clearBtn = document.getElementById('clear-console-btn');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const previewFullscreenBtn = document.getElementById('preview-fullscreen');
     const htmlPreview = document.getElementById('html-preview');
     const previewFrame = document.getElementById('preview-frame');
     const consoleEl = document.getElementById('console');
@@ -274,6 +345,60 @@ for i in range(3):
     print("línea", i)`
     };
 
+    function openOptions(){
+      optionsList.style.display = 'block';
+      fauxSelect.setAttribute('aria-expanded','true');
+    }
+    function closeOptions(){
+      optionsList.style.display = 'none';
+      fauxSelect.setAttribute('aria-expanded','false');
+    }
+
+    fauxSelect.addEventListener('click', () => {
+      if (optionsList.style.display === 'block') closeOptions(); else openOptions();
+    });
+
+    fauxSelect.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fauxSelect.click(); }
+      if (e.key === 'Escape') closeOptions();
+    });
+
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        opts.forEach(o => o.classList.remove('active'));
+        opt.classList.add('active');
+        const val = opt.dataset.value;
+        fauxLabel.textContent = opt.textContent;
+        closeOptions();
+        setLanguage(val);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!document.getElementById('lang-select-wrap').contains(e.target)) closeOptions();
+    });
+
+    function setLanguage(val){
+      languageSelect.value = val;
+      statusLang.textContent = val.toUpperCase();
+      const current = editor.value.trim();
+      const auto = templates[val];
+      if (!current || current === lastAutoTemplate) {
+        editor.value = auto;
+        lastAutoTemplate = auto;
+        saveLocal();
+        appendConsole(`Plantilla ${val.toUpperCase()} insertada.`);
+      } else {
+        appendConsole(`Idioma cambiado a ${val.toUpperCase()}.`);
+      }
+      // show/hide preview fullscreen button depending on language
+      if (val === 'html' && previewFrame.style.display === 'block') {
+        previewFullscreenBtn.style.display = 'inline-block';
+      } else {
+        previewFullscreenBtn.style.display = 'none';
+      }
+    }
+
     let pyodide = null;
     (async function loadPy(){
       try{
@@ -284,7 +409,7 @@ for i in range(3):
       }
     })();
 
-    const STORAGE_KEY = 'selektruncode_v0.6.1_code';
+    const STORAGE_KEY = 'selektruncode_v0.6.2_code';
     editor.value = localStorage.getItem(STORAGE_KEY) || '';
 
     function saveLocal(){
@@ -336,31 +461,16 @@ for i in range(3):
       appendConsole('Consola limpiada.');
     });
 
-    languageSelect.addEventListener('change', () => {
-      const lang = languageSelect.value;
-      statusLang.textContent = lang.toUpperCase();
-
-      const current = editor.value.trim();
-      const auto = templates[lang];
-
-      if (!current || current === lastAutoTemplate) {
-        editor.value = auto;
-        lastAutoTemplate = auto;
-        saveLocal();
-        appendConsole(`Plantilla ${lang.toUpperCase()} insertada.`);
-      } else {
-        appendConsole(`Idioma cambiado a ${lang.toUpperCase()}.`);
-      }
-    });
-
+    // initial template if empty
     (function initialTemplate(){
-      const lang = languageSelect.value;
+      const initial = languageSelect.value;
       if (!editor.value.trim()) {
-        editor.value = templates[lang];
-        lastAutoTemplate = templates[lang];
+        editor.value = templates[initial];
+        lastAutoTemplate = templates[initial];
         saveLocal();
       }
-      statusLang.textContent = languageSelect.value.toUpperCase();
+      statusLang.textContent = initial.toUpperCase();
+      fauxLabel.textContent = initial.toUpperCase();
     })();
 
     window.addEventListener('keydown', (e) => {
@@ -379,6 +489,7 @@ for i in range(3):
 
       if (lang === 'html'){
         previewFrame.style.display = 'block';
+        previewFullscreenBtn.style.display = 'inline-block';
         fullscreenBtn.style.display = 'inline-block';
         try{
           const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
@@ -392,6 +503,7 @@ for i in range(3):
         return;
       } else {
         previewFrame.style.display = 'none';
+        previewFullscreenBtn.style.display = 'none';
         fullscreenBtn.style.display = 'none';
       }
 
@@ -436,13 +548,17 @@ output
       }
     }
 
+    // fullscreen handlers
     fullscreenBtn.addEventListener('click', () => {
       if (htmlPreview.requestFullscreen) htmlPreview.requestFullscreen();
       else if (htmlPreview.webkitRequestFullscreen) htmlPreview.webkitRequestFullscreen();
     });
+    previewFullscreenBtn.addEventListener('click', () => {
+      if (previewFrame.requestFullscreen) previewFrame.requestFullscreen();
+      else if (previewFrame.webkitRequestFullscreen) previewFrame.webkitRequestFullscreen();
+    });
 
-    statusLang.textContent = languageSelect.value.toUpperCase();
-    appendConsole('Bienvenido a SelektRunCode v0.6.1 — plantillas automáticas activadas.');
+    appendConsole('Bienvenido a SelektRunCode v0.6.2 — interfaz actualizada.');
   </script>
 </body>
 </html>
