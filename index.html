@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SelektRunCode — v0.6.2</title>
+  <title>SelektRunCode — v0.6.3</title>
 
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 
@@ -23,6 +23,7 @@
       --radius:12px;
       --shadow: 0 6px 18px rgba(2,6,6,0.6);
       --glass-border: rgba(255,255,255,0.04);
+      --btn-contrast-border: rgba(0,0,0,0.12);
     }
 
     body.light {
@@ -37,6 +38,7 @@
       --danger:#d9534f;
       --shadow: 0 8px 24px rgba(12,18,24,0.06);
       --glass-border: rgba(11,18,32,0.06);
+      --btn-contrast-border: rgba(255,255,255,0.12);
     }
 
     html,body{height:100%;margin:0;font-family:"Inter",system-ui;}
@@ -97,7 +99,6 @@
     .controls-left{display:flex;gap:10px;align-items:center;}
     .controls-right{display:flex;gap:10px;align-items:center;}
 
-    /* Custom select wrapper */
     .select-wrap{
       position:relative;
       display:inline-block;
@@ -124,16 +125,13 @@
     .faux-select .arrow{font-size:14px;color:var(--muted);}
 
     .options-list{
-      position:absolute;
-      top:calc(100% + 8px);
-      left:0;
-      right:0;
-      background:var(--panel);
-      border:1px solid var(--glass-border);
+      position:static;
+      margin-top:8px;
+      background:transparent;
       border-radius:10px;
-      box-shadow:var(--shadow);
       z-index:60;
       overflow:hidden;
+      display:none;
     }
     .options-list .opt{
       padding:10px 12px;
@@ -141,15 +139,18 @@
       color:var(--text);
       font-weight:600;
       background:transparent;
+      border-radius:8px;
+      margin-bottom:6px;
+      border:1px solid transparent;
     }
-    .options-list .opt:hover{background:rgba(255,255,255,0.02);color:var(--accent-2);}
-    .options-list .opt.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;}
+    .options-list .opt:hover{background:rgba(255,255,255,0.02);color:var(--accent-2);border-color:rgba(255,255,255,0.02);}
+    .options-list .opt.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;border-color:transparent;}
 
     .btn-primary{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;font-weight:700;cursor:pointer;}
     .btn-ghost{padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:var(--text);cursor:pointer;font-weight:600;}
     .btn-icon{width:44px;height:44px;border-radius:10px;border:none;background:var(--glass);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);}
 
-    .editor-area{display:flex;flex-direction:column;gap:10px;height:calc(100% - 120px);}
+    .editor-area{display:flex;flex-direction:column;gap:10px;height:calc(100% - 160px);}
 
     textarea#editor{
       width:100%;
@@ -174,17 +175,18 @@
     .preview-frame{flex:1;border-radius:10px;border:1px solid var(--glass-border);overflow:hidden;background:#fff;display:none;position:relative;}
     iframe#html-preview{width:100%;height:100%;border:0;display:block;}
 
-    /* fullscreen button inside preview */
     .preview-fullscreen-btn{
       position:absolute;
       top:12px;
       right:12px;
       z-index:40;
-      width:44px;height:44px;border-radius:10px;border:none;background:var(--glass);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);
-      transition:transform .12s ease, background .12s ease;
-      box-shadow: 0 8px 20px rgba(2,6,6,0.12);
+      width:44px;height:44px;border-radius:10px;border:2px solid var(--btn-contrast-border);
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#04210f;
+      transition:transform .12s ease, box-shadow .12s ease;
+      box-shadow: 0 8px 20px rgba(31,166,106,0.18);
     }
-    .preview-fullscreen-btn:hover{transform:translateY(-3px);background:rgba(255,255,255,0.02);}
+    .preview-fullscreen-btn:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(31,166,106,0.22);}
 
     .console{height:260px;border-radius:10px;border:1px solid var(--glass-border);overflow:auto;background:linear-gradient(180deg, rgba(0,0,0,0.03), transparent);padding:12px;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);}
     .console .entry{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:6px;}
@@ -225,7 +227,7 @@
     </div>
 
     <div class="header-actions">
-      <div class="version-badge">v0.6.2</div>
+      <div class="version-badge">v0.6.3</div>
       <button id="theme-toggle" class="icon-btn">🌙</button>
       <button class="icon-btn">⚙️</button>
       <button class="icon-btn">🧩</button>
@@ -261,6 +263,7 @@
       </div>
 
       <div class="editor-area">
+        <div id="options-spacer" style="display:none;height:0;"></div>
         <textarea id="editor" spellcheck="false"></textarea>
       </div>
     </section>
@@ -311,7 +314,7 @@
     const fauxLabel = document.getElementById('faux-label');
     const optionsList = document.getElementById('options-list');
     const opts = Array.from(optionsList.querySelectorAll('.opt'));
-    const languageSelect = { value: 'html' }; // internal value holder
+    const languageSelect = { value: 'html' };
     const editor = document.getElementById('editor');
     const runBtn = document.getElementById('run-btn');
     const clearBtn = document.getElementById('clear-console-btn');
@@ -324,6 +327,7 @@
     const statusMsg = document.getElementById('status-msg');
     const themeToggle = document.getElementById('theme-toggle');
     const themeLabel = document.getElementById('theme-label');
+    const optionsSpacer = document.getElementById('options-spacer');
 
     let lastAutoTemplate = '';
 
@@ -348,10 +352,15 @@ for i in range(3):
     function openOptions(){
       optionsList.style.display = 'block';
       fauxSelect.setAttribute('aria-expanded','true');
+      // make spacer equal to options height so editor is pushed down
+      optionsSpacer.style.display = 'block';
+      optionsSpacer.style.height = optionsList.scrollHeight + 'px';
     }
     function closeOptions(){
       optionsList.style.display = 'none';
       fauxSelect.setAttribute('aria-expanded','false');
+      optionsSpacer.style.display = 'none';
+      optionsSpacer.style.height = '0';
     }
 
     fauxSelect.addEventListener('click', () => {
@@ -391,7 +400,6 @@ for i in range(3):
       } else {
         appendConsole(`Idioma cambiado a ${val.toUpperCase()}.`);
       }
-      // show/hide preview fullscreen button depending on language
       if (val === 'html' && previewFrame.style.display === 'block') {
         previewFullscreenBtn.style.display = 'inline-block';
       } else {
@@ -409,7 +417,7 @@ for i in range(3):
       }
     })();
 
-    const STORAGE_KEY = 'selektruncode_v0.6.2_code';
+    const STORAGE_KEY = 'selektruncode_v0.6.3_code';
     editor.value = localStorage.getItem(STORAGE_KEY) || '';
 
     function saveLocal(){
@@ -461,7 +469,6 @@ for i in range(3):
       appendConsole('Consola limpiada.');
     });
 
-    // initial template if empty
     (function initialTemplate(){
       const initial = languageSelect.value;
       if (!editor.value.trim()) {
@@ -548,7 +555,6 @@ output
       }
     }
 
-    // fullscreen handlers
     fullscreenBtn.addEventListener('click', () => {
       if (htmlPreview.requestFullscreen) htmlPreview.requestFullscreen();
       else if (htmlPreview.webkitRequestFullscreen) htmlPreview.webkitRequestFullscreen();
@@ -558,7 +564,7 @@ output
       else if (previewFrame.webkitRequestFullscreen) previewFrame.webkitRequestFullscreen();
     });
 
-    appendConsole('Bienvenido a SelektRunCode v0.6.2 — interfaz actualizada.');
+    appendConsole('Bienvenido a SelektRunCode v0.6.3 — desplegable y botón fullscreen actualizados.');
   </script>
 </body>
 </html>
