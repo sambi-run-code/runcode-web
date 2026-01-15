@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SelektRunCode - Editor</title>
+  <title>SelektRunCode - Editor v0.2</title>
 
   <!-- Pyodide -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
@@ -41,6 +41,37 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 14px;
+      font-size: 20px;
+      color: var(--accent-light);
+      align-items: center;
+    }
+
+    .header-icon {
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .header-icon:hover {
+      color: var(--accent);
+      transform: scale(1.15);
+    }
+
+    #header-msg {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      background: var(--panel-light);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      opacity: 0;
+      transition: 0.3s;
     }
 
     main {
@@ -150,7 +181,16 @@
 
 <header>
   SelektRunCode — Editor Minimalista
+  <div class="header-right">
+    <span>v0.2</span>
+    <span class="header-icon" data-msg="Configuración futura">⚙️</span>
+    <span class="header-icon" data-msg="Extensiones futuras">🧩</span>
+    <span class="header-icon" data-msg="Archivos futuros">📁</span>
+    <span class="header-icon" data-msg="Favoritos futuros">⭐</span>
+  </div>
 </header>
+
+<div id="header-msg"></div>
 
 <main>
 
@@ -166,6 +206,7 @@
     <textarea id="editor"></textarea>
 
     <button id="run-btn">Ejecutar</button>
+    <button id="clear-console-btn">Limpiar consola</button>
     <button id="fullscreen-btn" style="display:none;">Pantalla Completa</button>
   </div>
 
@@ -191,9 +232,11 @@
   const editor = document.getElementById('editor');
   const consoleOutput = document.getElementById('console');
   const runBtn = document.getElementById('run-btn');
+  const clearBtn = document.getElementById('clear-console-btn');
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   const htmlPreview = document.getElementById('html-preview');
   const loader = document.getElementById('loader');
+  const headerMsg = document.getElementById('header-msg');
 
   let pyodide = null;
 
@@ -203,12 +246,44 @@
   function hideLoader() { loader.style.display = "none"; }
 
   function setConsole(text, isError = false) {
+    const separator = "\n------------------------------\n";
     if (isError) {
-      consoleOutput.innerHTML = `<span class="error-text">${text}</span>`;
+      consoleOutput.innerHTML += separator + `<span class="error-text">${text}</span>`;
     } else {
-      consoleOutput.textContent = text;
+      consoleOutput.textContent += separator + text;
     }
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
   }
+
+  clearBtn.addEventListener("click", () => {
+    consoleOutput.textContent = "Consola limpiada.";
+  });
+
+  /* -------------------------
+     GUARDADO AUTOMÁTICO
+  --------------------------*/
+
+  editor.value = localStorage.getItem("editorCode") || "// Escribe tu código aquí";
+
+  editor.addEventListener("input", () => {
+    localStorage.setItem("editorCode", editor.value);
+  });
+
+  /* -------------------------
+     ICONOS INTERACTIVOS
+  --------------------------*/
+
+  document.querySelectorAll(".header-icon").forEach(icon => {
+    icon.addEventListener("click", () => {
+      headerMsg.textContent = icon.dataset.msg;
+      headerMsg.style.opacity = 1;
+      setTimeout(() => headerMsg.style.opacity = 0, 1500);
+    });
+  });
+
+  /* -------------------------
+     EJECUTAR
+  --------------------------*/
 
   runBtn.addEventListener('click', async () => {
     const lang = languageSelect.value;
@@ -254,6 +329,7 @@
             setConsole("Error Python:\n" + err, true);
           }
         }
+
       } finally {
         hideLoader();
       }
@@ -263,8 +339,6 @@
   fullscreenBtn.addEventListener('click', () => {
     htmlPreview.requestFullscreen();
   });
-
-  editor.value = "<h1>Hola mundo</h1>";
 </script>
 
 </body>
