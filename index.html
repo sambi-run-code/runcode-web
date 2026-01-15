@@ -3,12 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SelektRunCode — v0.6</title>
+  <title>SelektRunCode — v0.6.1</title>
 
-  <!-- Pyodide -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 
-  <!-- Tipografía -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
   <style>
@@ -41,11 +39,10 @@
       --glass-border: rgba(11,18,32,0.06);
     }
 
-    html,body{height:100%;margin:0;font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    html,body{height:100%;margin:0;font-family:"Inter",system-ui;}
     body{
       background: linear-gradient(180deg,var(--bg), #07100f 120%);
       color:var(--text);
-      -webkit-font-smoothing:antialiased;
       display:flex;
       flex-direction:column;
       min-height:100vh;
@@ -69,8 +66,8 @@
 
     .header-actions{display:flex;gap:12px;align-items:center;}
     .version-badge{font-weight:700;background:transparent;color:var(--muted);padding:6px 10px;border-radius:999px;border:1px solid var(--glass-border);font-size:13px;}
-    .icon-btn{width:44px;height:44px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--glass);border:1px solid var(--glass-border);cursor:pointer;color:var(--text);transition:transform .14s ease, background .14s ease;}
-    .icon-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(2,6,6,0.25);}
+    .icon-btn{width:44px;height:44px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--glass);border:1px solid var(--glass-border);cursor:pointer;color:var(--text);transition:transform .14s ease;}
+    .icon-btn:hover{transform:translateY(-3px);}
 
     main.app-main{
       display:grid;
@@ -79,7 +76,6 @@
       padding:22px;
       width:100%;
       box-sizing:border-box;
-      align-items:stretch;
       flex:1;
     }
 
@@ -89,10 +85,11 @@
       border:1px solid var(--glass-border);
       padding:16px;
       box-shadow:var(--shadow);
-      display:flex;flex-direction:column;gap:12px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
       box-sizing:border-box;
       position:relative;
-      z-index:0;
       overflow:hidden;
     }
 
@@ -101,32 +98,42 @@
     .controls-right{display:flex;gap:10px;align-items:center;}
     select.lang-select{background:transparent;border:1px solid var(--glass-border);color:var(--text);padding:8px 12px;border-radius:10px;font-weight:600;}
 
-    .btn-primary{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;font-weight:700;cursor:pointer;box-shadow: 0 8px 20px rgba(47,192,122,0.12);transition: transform .12s ease;}
-    .btn-ghost{padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:var(--text);cursor:pointer;font-weight:600;transition:transform .12s ease;}
-    .btn-ghost:hover{background:rgba(255,255,255,0.02);transform:translateY(-2px);}
-
-    .btn-icon{
-      width:44px;height:44px;border-radius:10px;border:none;background:var(--glass);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);
-      transition:transform .12s ease, background .12s ease;
-    }
-    .btn-icon:hover{transform:translateY(-3px);background:rgba(255,255,255,0.02);}
+    .btn-primary{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#04210f;font-weight:700;cursor:pointer;}
+    .btn-ghost{padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:var(--text);cursor:pointer;font-weight:600;}
+    .btn-icon{width:44px;height:44px;border-radius:10px;border:none;background:var(--glass);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--text);}
 
     .editor-area{display:flex;flex-direction:column;gap:10px;height:calc(100% - 120px);}
-    textarea#editor{width:100%;height:100%;min-height:360px;resize:none;padding:16px;border-radius:10px;border:1px solid var(--glass-border);background:linear-gradient(180deg, rgba(0,0,0,0.06), transparent);color:var(--text);font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.5;box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);}
+
+    textarea#editor{
+      width:100%;
+      height:100%;
+      min-height:360px;
+      resize:none;
+      padding:16px;
+      border-radius:10px;
+      border:1px solid var(--glass-border);
+      background:linear-gradient(180deg, rgba(0,0,0,0.06), transparent);
+      color:var(--text);
+      font-family:"JetBrains Mono",monospace;
+      font-size:13px;
+      line-height:1.5;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+      box-sizing:border-box;
+      overflow:auto;
+      max-width:100%;
+    }
 
     .preview-panel{display:flex;flex-direction:column;gap:12px;height:100%;}
-    .preview-frame{flex:1;border-radius:10px;border:1px solid var(--glass-border);overflow:hidden;background:#fff;display:none;position:relative;z-index:1;}
-    iframe#html-preview{width:100%;height:100%;border:0;display:block;}
+    .preview-frame{flex:1;border-radius:10px;border:1px solid var(--glass-border);overflow:hidden;background:#fff;display:none;}
+    iframe#html-preview{width:100%;height:100%;border:0;}
 
     .console{height:260px;border-radius:10px;border:1px solid var(--glass-border);overflow:auto;background:linear-gradient(180deg, rgba(0,0,0,0.03), transparent);padding:12px;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);}
     .console .entry{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:8px;padding:10px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:6px;}
-    .console .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;}
+    .console .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;}
     .console .text{white-space:pre-wrap;color:var(--text);}
 
     .side-info{display:flex;flex-direction:column;gap:12px;height:100%;}
     .card{padding:12px;border-radius:10px;border:1px solid var(--glass-border);background:var(--card);color:var(--muted);}
-
-    footer.statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-top:1px solid var(--glass-border);background:linear-gradient(180deg, transparent, rgba(255,255,255,0.01));font-size:13px;color:var(--muted);}
 
     .ad-slot{
       width:100%;
@@ -141,14 +148,10 @@
       box-sizing:border-box;
     }
 
-    main.app-main > * { min-height: 220px; box-sizing: border-box; }
-    .panel, .preview-panel, .side-info { z-index: 0; }
-    .preview-frame { z-index: 1; }
-    header.app-header { z-index: 30; }
-    footer.statusbar { z-index: 20; }
+    footer.statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-top:1px solid var(--glass-border);background:linear-gradient(180deg, transparent, rgba(255,255,255,0.01));font-size:13px;color:var(--muted);}
 
     @media (max-width:1200px){ main.app-main{grid-template-columns:1fr 420px 300px;} }
-    @media (max-width:980px){ main.app-main{grid-template-columns:1fr; padding:16px;} .preview-panel{order:2} .side-info{order:3} }
+    @media (max-width:980px){ main.app-main{grid-template-columns:1fr; padding:16px;} }
   </style>
 </head>
 <body>
@@ -163,21 +166,21 @@
     </div>
 
     <div class="header-actions">
-      <div class="version-badge">v0.6</div>
-      <button id="theme-toggle" class="icon-btn" title="Cambiar tema">🌙</button>
-      <button class="icon-btn" title="Configuración">⚙️</button>
-      <button class="icon-btn" title="Extensiones">🧩</button>
-      <button class="icon-btn" title="Archivos">📁</button>
-      <button class="icon-btn" title="Favoritos">⭐</button>
+      <div class="version-badge">v0.6.1</div>
+      <button id="theme-toggle" class="icon-btn">🌙</button>
+      <button class="icon-btn">⚙️</button>
+      <button class="icon-btn">🧩</button>
+      <button class="icon-btn">📁</button>
+      <button class="icon-btn">⭐</button>
     </div>
   </header>
 
   <main class="app-main">
 
-    <section class="panel" style="min-height:520px;">
+    <section class="panel">
       <div class="editor-top">
         <div class="controls-left">
-          <select id="language" class="lang-select" aria-label="Seleccionar lenguaje">
+          <select id="language" class="lang-select">
             <option value="html">HTML</option>
             <option value="javascript">JavaScript</option>
             <option value="python">Python</option>
@@ -186,15 +189,14 @@
         </div>
 
         <div class="controls-right">
-          <button id="run-btn" class="btn-primary" title="Ejecutar (Ctrl+Enter)">▶ Ejecutar</button>
-          <button id="clear-console-btn" class="btn-ghost" title="Limpiar consola">🧹 Limpiar</button>
-          <!-- Icon-only fullscreen button -->
-          <button id="fullscreen-btn" class="btn-icon" title="Pantalla completa" aria-label="Pantalla completa" style="display:none;">⤢</button>
+          <button id="run-btn" class="btn-primary">▶ Ejecutar</button>
+          <button id="clear-console-btn" class="btn-ghost">🧹 Limpiar</button>
+          <button id="fullscreen-btn" class="btn-icon" style="display:none;">⤢</button>
         </div>
       </div>
 
       <div class="editor-area">
-        <textarea id="editor" spellcheck="false" aria-label="Editor de código"></textarea>
+        <textarea id="editor" spellcheck="false"></textarea>
       </div>
     </section>
 
@@ -204,7 +206,7 @@
         <div style="margin-left:auto;color:var(--muted);font-size:13px;">Salida visual y consola</div>
       </div>
 
-      <div class="preview-frame" id="preview-frame" style="min-height:220px;">
+      <div class="preview-frame" id="preview-frame">
         <iframe id="html-preview" sandbox="allow-scripts allow-same-origin"></iframe>
       </div>
 
@@ -226,7 +228,7 @@
       <div class="card">
         <strong>Publicidad</strong>
         <div class="ad-slot" id="ad-slot">
-          Bloque de anuncios (aquí inserta tu script de AdSense o tag)
+          Bloque de anuncios
         </div>
       </div>
     </aside>
@@ -252,10 +254,8 @@
     const themeToggle = document.getElementById('theme-toggle');
     const themeLabel = document.getElementById('theme-label');
 
-    // Track last auto-inserted template to avoid overwriting user code
     let lastAutoTemplate = '';
 
-    // Templates per language
     const templates = {
       html: `<!doctype html>
 <html>
@@ -267,16 +267,13 @@
     <h1 style="color:#2fc07a">Hola HTML</h1>
   </body>
 </html>`,
-      javascript: `// JavaScript de ejemplo
-console.log("Hola desde JavaScript");
+      javascript: `console.log("Hola desde JavaScript");
 return 5 + 7;`,
-      python: `# Python de ejemplo
-print("Hola desde Python")
+      python: `print("Hola desde Python")
 for i in range(3):
     print("línea", i)`
     };
 
-    // Pyodide
     let pyodide = null;
     (async function loadPy(){
       try{
@@ -287,8 +284,7 @@ for i in range(3):
       }
     })();
 
-    // Local storage
-    const STORAGE_KEY = 'selektruncode_v0.6_code';
+    const STORAGE_KEY = 'selektruncode_v0.6.1_code';
     editor.value = localStorage.getItem(STORAGE_KEY) || '';
 
     function saveLocal(){
@@ -302,7 +298,6 @@ for i in range(3):
       window._saveTimeout = setTimeout(saveLocal, 700);
     });
 
-    // Theme
     if (localStorage.getItem('sr_theme') === 'light'){
       document.body.classList.add('light');
       themeToggle.textContent = '🌞';
@@ -319,14 +314,13 @@ for i in range(3):
       localStorage.setItem('sr_theme', isLight ? 'light' : 'dark');
     });
 
-    // Console helpers
     function appendConsole(text, isError=false){
       const entry = document.createElement('div');
       entry.className = 'entry';
       const meta = document.createElement('div');
       meta.className = 'meta';
       const now = new Date();
-      meta.innerHTML = `<div>${now.toLocaleTimeString()}</div><div style="color:var(--muted)">${isError ? 'Error' : 'Info'}</div>`;
+      meta.innerHTML = `<div>${now.toLocaleTimeString()}</div><div>${isError ? 'Error' : 'Info'}</div>`;
       const txt = document.createElement('div');
       txt.className = 'text';
       txt.textContent = text;
@@ -337,13 +331,11 @@ for i in range(3):
       consoleEl.scrollTop = consoleEl.scrollHeight;
     }
 
-    // Clear console
     clearBtn.addEventListener('click', () => {
       consoleEl.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Consola de salida</div>';
       appendConsole('Consola limpiada.');
     });
 
-    // Auto-insert template when language changes
     languageSelect.addEventListener('change', () => {
       const lang = languageSelect.value;
       statusLang.textContent = lang.toUpperCase();
@@ -351,19 +343,16 @@ for i in range(3):
       const current = editor.value.trim();
       const auto = templates[lang];
 
-      // Insert template if editor is empty OR if last insertion was an auto-template
       if (!current || current === lastAutoTemplate) {
         editor.value = auto;
         lastAutoTemplate = auto;
         saveLocal();
-        appendConsole(`Plantilla ${lang.toUpperCase()} insertada por defecto.`);
+        appendConsole(`Plantilla ${lang.toUpperCase()} insertada.`);
       } else {
-        // Do not overwrite user's code; just notify
-        appendConsole(`Idioma cambiado a ${lang.toUpperCase()}. (No se sobrescribió el código existente)`);
+        appendConsole(`Idioma cambiado a ${lang.toUpperCase()}.`);
       }
     });
 
-    // If editor empty on first load, insert template for default language
     (function initialTemplate(){
       const lang = languageSelect.value;
       if (!editor.value.trim()) {
@@ -374,14 +363,12 @@ for i in range(3):
       statusLang.textContent = languageSelect.value.toUpperCase();
     })();
 
-    // Keyboard shortcuts
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveLocal(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); clearBtn.click(); }
     });
 
-    // Run code
     runBtn.addEventListener('click', runCode);
 
     async function runCode(){
@@ -396,67 +383,3 @@ for i in range(3):
         try{
           const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
           doc.open(); doc.write(code); doc.close();
-          appendConsole('Renderizado HTML correctamente.');
-          statusMsg.textContent = 'Renderizado HTML';
-        }catch(e){
-          appendConsole('Error renderizando HTML: ' + e, true);
-          statusMsg.textContent = 'Error HTML';
-        }
-        return;
-      } else {
-        previewFrame.style.display = 'none';
-        fullscreenBtn.style.display = 'none';
-      }
-
-      if (lang === 'javascript'){
-        try{
-          const result = new Function(code)();
-          appendConsole('Resultado JS: ' + String(result));
-          statusMsg.textContent = 'JS ejecutado';
-        }catch(e){
-          appendConsole('Error JS: ' + String(e), true);
-          statusMsg.textContent = 'Error JS';
-        }
-        return;
-      }
-
-      if (lang === 'python'){
-        if (!pyodide){
-          appendConsole('Pyodide no está listo aún. Espera unos segundos...', true);
-          statusMsg.textContent = 'Pyodide no listo';
-          return;
-        }
-        try{
-          const wrapped = `
-import sys, io
-_old = sys.stdout
-sys.stdout = io.StringIO()
-try:
-${code.split('\n').map(l => '    ' + l).join('\n')}
-    output = sys.stdout.getvalue()
-finally:
-    sys.stdout = _old
-output
-`;
-          const output = await pyodide.runPythonAsync(wrapped);
-          appendConsole(String(output || '').trim() || '(sin salida)');
-          statusMsg.textContent = 'Python ejecutado';
-        }catch(e){
-          appendConsole('Error Python: ' + String(e), true);
-          statusMsg.textContent = 'Error Python';
-        }
-        return;
-      }
-    }
-
-    // Fullscreen preview
-    fullscreenBtn.addEventListener('click', () => {
-      if (htmlPreview.requestFullscreen) htmlPreview.requestFullscreen();
-      else if (htmlPreview.webkitRequestFullscreen) htmlPreview.webkitRequestFullscreen();
-    });
-
-    // Initial welcome
-    appendConsole('Bienvenido a SelektRunCode v0.6 — plantillas automáticas activadas.');
-  </script>
-</body>
-</html>
