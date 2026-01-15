@@ -2,72 +2,56 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Test SelektRunCode</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SelektRunCode - Editor</title>
+
+  <!-- Pyodide -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+
   <style>
-    body { background: #111; color: #eee; font-family: sans-serif; padding: 20px; }
-    textarea, select, button { font-size: 14px; margin: 10px 0; width: 100%; }
-    #console { background: #222; padding: 10px; white-space: pre-wrap; border-radius: 6px; }
-  </style>
-</head>
-<body>
-
-  <h2>Editor</h2>
-  <select id="lang">
-    <option value="html">HTML</option>
-    <option value="javascript">JavaScript</option>
-    <option value="python">Python</option>
-  </select>
-
-  <textarea id="code" rows="10">// Escribe tu código aquí</textarea>
-  <button onclick="run()">Ejecutar</button>
-
-  <h3>Consola</h3>
-  <div id="console">Esperando...</div>
-  <iframe id="preview" style="width:100%; height:200px; border:none; display:none;"></iframe>
-
-  <script>
-    const lang = document.getElementById('lang');
-    const code = document.getElementById('code');
-    const consoleEl = document.getElementById('console');
-    const preview = document.getElementById('preview');
-
-    let pyodide = null;
-    loadPyodide().then(p => { pyodide = p; });
-
-    function run() {
-      const value = code.value;
-      const selected = lang.value;
-      consoleEl.textContent = "Procesando...";
-      preview.style.display = "none";
-
-      if (selected === "html") {
-        const doc = preview.contentDocument || preview.contentWindow.document;
-        doc.open(); doc.write(value); doc.close();
-        preview.style.display = "block";
-        consoleEl.textContent = "Renderizado HTML";
-      }
-
-      else if (selected === "javascript") {
-        try {
-          const result = new Function(value)();
-          consoleEl.textContent = "Resultado JS:\n" + result;
-        } catch (e) {
-          consoleEl.textContent = "Error JS:\n" + e;
-        }
-      }
-
-      else if (selected === "python") {
-        if (!pyodide) {
-          consoleEl.textContent = "Pyodide aún no cargado";
-          return;
-        }
-        pyodide.runPythonAsync(value)
-          .then(output => consoleEl.textContent = "Salida Python:\n" + output)
-          .catch(err => consoleEl.textContent = "Error Python:\n" + err);
-      }
+    :root {
+      --bg: #0f1412;
+      --panel: #1a1f1d;
+      --panel-light: #222826;
+      --accent: #3ba37b;
+      --accent-light: #4fcf9c;
+      --text: #e8f1ec;
+      --text-dim: #9aa7a0;
+      --border: #2a2f2d;
+      --radius: 10px;
+      --error: #ff4d4d;
     }
-  </script>
 
-</body>
-</html>
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 14px 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr 260px;
+      gap: 14px;
+      padding: 14px;
+      box-sizing: border-box;
+    }
+
+    .editor-panel, .console-panel, .ads-panel {
+      background: var(--panel);
+     
