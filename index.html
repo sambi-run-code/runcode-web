@@ -383,3 +383,66 @@ for i in range(3):
         try{
           const doc = htmlPreview.contentDocument || htmlPreview.contentWindow.document;
           doc.open(); doc.write(code); doc.close();
+          appendConsole('Renderizado HTML correctamente.');
+          statusMsg.textContent = 'Renderizado HTML';
+        }catch(e){
+          appendConsole('Error renderizando HTML: ' + e, true);
+          statusMsg.textContent = 'Error HTML';
+        }
+        return;
+      } else {
+        previewFrame.style.display = 'none';
+        fullscreenBtn.style.display = 'none';
+      }
+
+      if (lang === 'javascript'){
+        try{
+          const result = new Function(code)();
+          appendConsole('Resultado JS: ' + String(result));
+          statusMsg.textContent = 'JS ejecutado';
+        }catch(e){
+          appendConsole('Error JS: ' + String(e), true);
+          statusMsg.textContent = 'Error JS';
+        }
+        return;
+      }
+
+      if (lang === 'python'){
+        if (!pyodide){
+          appendConsole('Pyodide no está listo aún. Espera unos segundos...', true);
+          statusMsg.textContent = 'Pyodide no listo';
+          return;
+        }
+        try{
+          const wrapped = `
+import sys, io
+_old = sys.stdout
+sys.stdout = io.StringIO()
+try:
+${code.split('\n').map(l => '    ' + l).join('\n')}
+    output = sys.stdout.getvalue()
+finally:
+    sys.stdout = _old
+output
+`;
+          const output = await pyodide.runPythonAsync(wrapped);
+          appendConsole(String(output || '').trim() || '(sin salida)');
+          statusMsg.textContent = 'Python ejecutado';
+        }catch(e){
+          appendConsole('Error Python: ' + String(e), true);
+          statusMsg.textContent = 'Error Python';
+        }
+        return;
+      }
+    }
+
+    fullscreenBtn.addEventListener('click', () => {
+      if (htmlPreview.requestFullscreen) htmlPreview.requestFullscreen();
+      else if (htmlPreview.webkitRequestFullscreen) htmlPreview.webkitRequestFullscreen();
+    });
+
+    statusLang.textContent = languageSelect.value.toUpperCase();
+    appendConsole('Bienvenido a SelektRunCode v0.6.1 — plantillas automáticas activadas.');
+  </script>
+</body>
+</html>
