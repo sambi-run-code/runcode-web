@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SelektRunCode — v0.5</title>
+  <title>SelektRunCode — v0.6</title>
 
   <!-- Pyodide -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
@@ -128,7 +128,6 @@
 
     footer.statusbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-top:1px solid var(--glass-border);background:linear-gradient(180deg, transparent, rgba(255,255,255,0.01));font-size:13px;color:var(--muted);}
 
-    /* Ad slot */
     .ad-slot{
       width:100%;
       height:250px;
@@ -142,7 +141,6 @@
       box-sizing:border-box;
     }
 
-    /* Fix overlapping issues: ensure panels stack cleanly */
     main.app-main > * { min-height: 220px; box-sizing: border-box; }
     .panel, .preview-panel, .side-info { z-index: 0; }
     .preview-frame { z-index: 1; }
@@ -165,7 +163,7 @@
     </div>
 
     <div class="header-actions">
-      <div class="version-badge">v0.5</div>
+      <div class="version-badge">v0.6</div>
       <button id="theme-toggle" class="icon-btn" title="Cambiar tema">🌙</button>
       <button class="icon-btn" title="Configuración">⚙️</button>
       <button class="icon-btn" title="Extensiones">🧩</button>
@@ -225,25 +223,10 @@
         </ul>
       </div>
 
-      <div class="card" style="display:flex;flex-direction:column;gap:12px;align-items:stretch;">
-        <strong>Plantillas rápidas</strong>
-        <button id="tpl-html" class="btn-ghost" style="width:100%;">Insertar HTML</button>
-        <button id="tpl-js" class="btn-ghost" style="width:100%;">Insertar JavaScript</button>
-        <button id="tpl-py" class="btn-ghost" style="width:100%;">Insertar Python</button>
-      </div>
-
       <div class="card">
         <strong>Publicidad</strong>
         <div class="ad-slot" id="ad-slot">
           Bloque de anuncios (aquí inserta tu script de AdSense o tag)
-        </div>
-      </div>
-
-      <div class="card">
-        <strong>Estado</strong>
-        <div style="margin-top:8px;color:var(--muted);font-size:13px;">
-          <div>Guardado local: <span id="saved-indicator">Sí</span></div>
-          <div style="margin-top:6px;">Pyodide: <span id="pyodide-status">Cargando...</span></div>
         </div>
       </div>
     </aside>
@@ -264,41 +247,62 @@
     const htmlPreview = document.getElementById('html-preview');
     const previewFrame = document.getElementById('preview-frame');
     const consoleEl = document.getElementById('console');
-    const savedIndicator = document.getElementById('saved-indicator');
-    const pyodideStatus = document.getElementById('pyodide-status');
     const statusLang = document.getElementById('status-lang');
     const statusMsg = document.getElementById('status-msg');
     const themeToggle = document.getElementById('theme-toggle');
     const themeLabel = document.getElementById('theme-label');
 
+    // Track last auto-inserted template to avoid overwriting user code
+    let lastAutoTemplate = '';
+
+    // Templates per language
+    const templates = {
+      html: `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Demo</title>
+  </head>
+  <body>
+    <h1 style="color:#2fc07a">Hola HTML</h1>
+  </body>
+</html>`,
+      javascript: `// JavaScript de ejemplo
+console.log("Hola desde JavaScript");
+return 5 + 7;`,
+      python: `# Python de ejemplo
+print("Hola desde Python")
+for i in range(3):
+    print("línea", i)`
+    };
+
+    // Pyodide
     let pyodide = null;
     (async function loadPy(){
       try{
-        pyodideStatus.textContent = 'Cargando...';
         pyodide = await loadPyodide({indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"});
-        pyodideStatus.textContent = 'Listo';
+        appendConsole('Pyodide cargado correctamente.');
       }catch(e){
-        pyodideStatus.textContent = 'Error';
         appendConsole('Error cargando Pyodide: ' + String(e), true);
       }
     })();
 
-    const STORAGE_KEY = 'selektruncode_v0.5_code';
-    editor.value = localStorage.getItem(STORAGE_KEY) || `<!-- HTML de ejemplo -->\n<h1 style="color:#2fc07a">Hola desde SelektRunCode v0.5</h1>\n<p>Selecciona JavaScript o Python para probar otros modos.</p>`;
+    // Local storage
+    const STORAGE_KEY = 'selektruncode_v0.6_code';
+    editor.value = localStorage.getItem(STORAGE_KEY) || '';
 
     function saveLocal(){
       localStorage.setItem(STORAGE_KEY, editor.value);
-      savedIndicator.textContent = 'Sí';
       statusMsg.textContent = 'Guardado local';
-      setTimeout(()=> statusMsg.textContent = 'Listo', 1200);
+      setTimeout(()=> statusMsg.textContent = 'Listo', 1000);
     }
 
     editor.addEventListener('input', () => {
-      savedIndicator.textContent = 'No';
       if (window._saveTimeout) clearTimeout(window._saveTimeout);
       window._saveTimeout = setTimeout(saveLocal, 700);
     });
 
+    // Theme
     if (localStorage.getItem('sr_theme') === 'light'){
       document.body.classList.add('light');
       themeToggle.textContent = '🌞';
@@ -315,6 +319,7 @@
       localStorage.setItem('sr_theme', isLight ? 'light' : 'dark');
     });
 
+    // Console helpers
     function appendConsole(text, isError=false){
       const entry = document.createElement('div');
       entry.className = 'entry';
@@ -332,29 +337,52 @@
       consoleEl.scrollTop = consoleEl.scrollHeight;
     }
 
+    // Clear console
     clearBtn.addEventListener('click', () => {
       consoleEl.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Consola de salida</div>';
       appendConsole('Consola limpiada.');
     });
 
-    document.getElementById('tpl-html').addEventListener('click', () => {
-      editor.value = `<!doctype html>\n<html>\n  <head>\n    <meta charset="utf-8">\n    <title>Demo</title>\n  </head>\n  <body>\n    <h1 style="color: #2fc07a">Hola HTML</h1>\n  </body>\n</html>`;
-    });
-    document.getElementById('tpl-js').addEventListener('click', () => {
-      editor.value = `console.log("Hola desde JavaScript");\nreturn 5 + 7;`;
-    });
-    document.getElementById('tpl-py').addEventListener('click', () => {
-      editor.value = `print("Hola desde Python")\nfor i in range(3):\n    print("línea", i)`;
+    // Auto-insert template when language changes
+    languageSelect.addEventListener('change', () => {
+      const lang = languageSelect.value;
+      statusLang.textContent = lang.toUpperCase();
+
+      const current = editor.value.trim();
+      const auto = templates[lang];
+
+      // Insert template if editor is empty OR if last insertion was an auto-template
+      if (!current || current === lastAutoTemplate) {
+        editor.value = auto;
+        lastAutoTemplate = auto;
+        saveLocal();
+        appendConsole(`Plantilla ${lang.toUpperCase()} insertada por defecto.`);
+      } else {
+        // Do not overwrite user's code; just notify
+        appendConsole(`Idioma cambiado a ${lang.toUpperCase()}. (No se sobrescribió el código existente)`);
+      }
     });
 
+    // If editor empty on first load, insert template for default language
+    (function initialTemplate(){
+      const lang = languageSelect.value;
+      if (!editor.value.trim()) {
+        editor.value = templates[lang];
+        lastAutoTemplate = templates[lang];
+        saveLocal();
+      }
+      statusLang.textContent = languageSelect.value.toUpperCase();
+    })();
+
+    // Keyboard shortcuts
     window.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveLocal(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); clearBtn.click(); }
     });
 
+    // Run code
     runBtn.addEventListener('click', runCode);
-    languageSelect.addEventListener('change', () => { statusLang.textContent = languageSelect.value.toUpperCase(); });
 
     async function runCode(){
       const lang = languageSelect.value;
@@ -421,16 +449,14 @@ output
       }
     }
 
+    // Fullscreen preview
     fullscreenBtn.addEventListener('click', () => {
       if (htmlPreview.requestFullscreen) htmlPreview.requestFullscreen();
       else if (htmlPreview.webkitRequestFullscreen) htmlPreview.webkitRequestFullscreen();
     });
 
-    statusLang.textContent = languageSelect.value.toUpperCase();
-    appendConsole('Bienvenido a SelektRunCode v0.5 — interfaz profesional cargada.');
-
-    // AD SLOT note: insert your ad provider script into #ad-slot
-    // Example: for AdSense you would place the ad unit code inside the element with id="ad-slot"
+    // Initial welcome
+    appendConsole('Bienvenido a SelektRunCode v0.6 — plantillas automáticas activadas.');
   </script>
 </body>
 </html>
